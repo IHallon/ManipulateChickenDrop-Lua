@@ -1,0 +1,133 @@
+-- Game where eggs fall from top player clicks
+-- Before hit the bottom
+-- Game ends when egg hits bottom
+function love.load()
+  birdEgg = love.graphics.newImage("Bird_Egg.png")
+  goldenEgg = love.graphics.newImage("Golden_Bird_Egg.png")
+  backgroundImage = love.graphics.newImage("AB_Background.png")
+
+  currentCount = 0
+  goldEggCount = 0
+  eggClicked = 0
+
+  eggDefaultSizex = 0.25
+  eggDefaultSizey = 0.25
+  goldenDefaultSizex = 0.4
+  goldenDefaultSizey = 0.4
+  
+  math.randomseed(os.time())
+  math.random(); math.random(); math.random()
+  startx = {math.random(0, love.graphics.getWidth() - birdEgg:getWidth()),
+            math.random(0, love.graphics.getWidth() - birdEgg:getWidth()), 
+            math.random(0, love.graphics.getWidth() - birdEgg:getWidth()), 
+            math.random(0, love.graphics.getWidth() - birdEgg:getWidth()),
+            math.random(0, love.graphics.getWidth() - birdEgg:getWidth())}
+  starty = {0 - math.random(birdEgg:getHeight(), birdEgg:getHeight() * 2),
+            0 - math.random(birdEgg:getHeight(), birdEgg:getHeight() * 2),
+            0 - math.random(birdEgg:getHeight(), birdEgg:getHeight() * 2),
+            0 - math.random(birdEgg:getHeight(), birdEgg:getHeight() * 2),
+            0 - math.random(birdEgg:getHeight(), birdEgg:getHeight() * 2)}
+
+  powerupx = {math.random(0, love.graphics.getWidth() - goldenEgg:getWidth())}
+  powerupy = {0 - math.random(goldenEgg:getHeight(), goldenEgg:getHeight() * 2)}
+end
+
+-------------------------------------------------
+-- MOUSE PRESS
+-- 1 = left, 2 = right, 3 = middle wheel
+-------------------------------------------------
+function love.mousepressed(x, y, button, istouch)
+  if button == 1 then
+    -- print("left mouse clicked")
+    eggClicked = eggClicked + 1
+    print(eggClicked)
+    for i, v in ipairs(startx) do
+      -- If the mouse x and y is within the boundary of a egg picture
+      if x >= startx[i] and x <= startx[i] + birdEgg:getWidth() and y >= starty[i] and y <= starty[i] + birdEgg:getHeight() then
+        -- print("in bounds")
+        math.randomseed(os.time())
+        math.random(); math.random(); math.random()
+        -- Reset its y value (go back to the top)
+        starty[i] = math.random(birdEgg:getHeight(), birdEgg:getHeight() * 2) * -1
+      end
+      
+    end
+    
+  end
+  
+  if eggClicked >= 5 then
+    -- print("left mouse clicked")
+    for i, v in ipairs(powerupx) do
+      -- If the mouse x and y is within the boundary of a egg picture
+      if x >= powerupx[i] and x <= powerupx[i] + goldenEgg:getWidth() and y >= powerupy[i] and y <= powerupy[i] + goldenEgg:getHeight() then
+        -- print("in bounds")
+        math.randomseed(os.time())
+        math.random(); math.random(); math.random()
+        -- Reset its y value (go back to the top)
+        powerupy[i] = math.random(goldenEgg:getHeight(), goldenEgg:getHeight() * 2) * -1
+        print("You have clicked on the golden egg")
+        currentCount = eggClicked
+
+        --Powerup abilities here
+        eggDefaultSizex = eggDefaultSizex * 0.9
+        eggDefaultSizey = eggDefaultSizey * 0.9
+        goldenDefaultSizex = goldenDefaultSizex * 0.9
+        goldenDefaultSizey = goldenDefaultSizey * 0.9
+        
+      end
+      
+    end
+    
+  end
+  
+end
+
+-------------------------------------------------
+-- UPDATE
+-------------------------------------------------
+function love.update(dt)
+  for i, v in ipairs(starty) do
+    --If egg hits the bottom of the screen, lua quits (we lose)
+    if starty[i] + birdEgg:getHeight() >= love.graphics.getHeight() then
+      --print("over the edge")
+      love.event.quit()
+    end
+    
+    -- Eggs move down
+    starty[i] = starty[i] + 80 * dt
+  end
+
+  if eggClicked >= 5 then
+    for i, v in ipairs(powerupy) do
+      --If egg hits the bottom of the screen, lua quits (we lose)
+      if powerupy[i] + goldenEgg:getHeight() >= love.graphics.getHeight() then
+        currentCount = eggClicked
+        powerupy[i] = math.random(goldenEgg:getHeight(), goldenEgg:getHeight() * 2) * -1
+      end
+      
+      if eggClicked >= currentCount + 5 then
+        powerupy[i] = powerupy[i] + 80 * dt
+      end
+      
+    end
+    
+  end
+  
+end
+
+-------------------------------------------------
+-- DRAW
+-------------------------------------------------
+function love.draw()
+  love.graphics.draw(backgroundImage, 0, 0)
+  -- Draw each egg at their respective x and y
+  for i, v in ipairs(startx) do
+    love.graphics.draw(birdEgg, startx[i], starty[i], 0, eggDefaultSizex, eggDefaultSizey)
+  end
+  
+  for i, v in ipairs(powerupx) do
+    love.graphics.draw(goldenEgg, powerupx[i], powerupy[i], 0, goldenDefaultSizex, goldenDefaultSizey)
+   
+  end
+  
+end
